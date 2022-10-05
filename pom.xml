@@ -6,6 +6,10 @@
     <groupId>com.xwh.gulimall</groupId>
     <artifactId>gulimall</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+    </properties>
     <name>gulimall</name>
     <description>聚合服务</description>
     <packaging>pom</packaging>
@@ -16,5 +20,8 @@
         <module>gulimall-product</module>
         <module>gulimall-order</module>
         <module>gulimall-member</module>
+        <module>renren-fast</module>
+        <module>renren-generator</module>
+        <module>gulimall-common</module>
     </modules>
 </project>
