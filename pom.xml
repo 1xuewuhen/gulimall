@@ -22,6 +22,7 @@
         <module>gulimall-member</module>
         <module>renren-fast</module>
         <module>renren-generator</module>
+        <module>gulimall-gateway</module>
         <module>gulimall-common</module>
     </modules>
 </project>

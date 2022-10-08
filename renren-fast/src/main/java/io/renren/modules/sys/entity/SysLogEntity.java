@@ -41,5 +41,4 @@ public class SysLogEntity implements Serializable {
 	private String ip;
 	//创建时间
 	private Date createDate;
-
 }
