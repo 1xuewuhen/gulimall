@@ -10,6 +10,8 @@ server:
     context-path: /renren-fast
 
 spring:
+  application:
+    name: renren-fast
   # 环境 dev|test|prod
   profiles:
     active: dev
@@ -40,12 +42,11 @@ spring:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
 
-  application:
-    name: renren-fast
+
   cloud:
     nacos:
       discovery:
-        service: 127.0.0.1:8848
+        server-addr: 127.0.0.1:8848
 
 #  resources:
 #    add-mappings: false
