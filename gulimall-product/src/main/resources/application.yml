@@ -17,6 +17,12 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+      logic-not-delete-value: 0
+      logic-delete-value: 1
 
 server:
   port: 10000
+
+logging:
+  level:
+    com.xwh.gulimall: debug
