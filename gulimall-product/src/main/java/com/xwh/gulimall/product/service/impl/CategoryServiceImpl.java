@@ -1,11 +1,10 @@
 package com.xwh.gulimall.product.service.impl;
 
+import com.xwh.gulimall.product.service.CategoryBrandRelationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -17,10 +16,14 @@ import com.xwh.common.utils.Query;
 import com.xwh.gulimall.product.dao.CategoryDao;
 import com.xwh.gulimall.product.entity.CategoryEntity;
 import com.xwh.gulimall.product.service.CategoryService;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service("categoryService")
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
+
+    @Autowired
+    private CategoryBrandRelationService categoryBrandRelationService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -47,6 +50,29 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         //TODO 1、检查当前删除的菜单，是否被别的地方应用
         //逻辑删除
         baseMapper.deleteBatchIds(asList);
+    }
+
+    @Override
+    public Long[] findCatelogPath(Long catelogId) {
+        List<Long> paths = new ArrayList<>();
+        findCatelogParent(catelogId, paths);
+        Collections.reverse(paths);
+        return paths.toArray(new Long[paths.size()]);
+    }
+
+    @Transactional
+    @Override
+    public void updateCascode(CategoryEntity category) {
+        this.updateById(category);
+        categoryBrandRelationService.updateCategory(category.getCatId(),category.getName());
+    }
+
+    private void findCatelogParent(Long catelogId, List<Long> paths) {
+        paths.add(catelogId);
+        CategoryEntity categoryEntity = this.baseMapper.selectById(catelogId);
+        if (categoryEntity.getParentCid() != 0) {
+            findCatelogParent(categoryEntity.getParentCid(), paths);
+        }
     }
 
 
