@@ -1,6 +1,7 @@
 package com.xwh.gulimall.product.exception;
 
 
+import com.xwh.common.exception.BizCodeEnum;
 import com.xwh.common.utils.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindingResult;
@@ -44,9 +45,13 @@ public class GulimallExceptionControllerAdvice {
             String field = fieldError.getField();
             map.put(field, message);
         });
-        return R.error(400, "提交的数据不合法").put("data", map);
+        return R.error(BizCodeEnum.VAILD_EXCEPTION.getCode(), BizCodeEnum.VAILD_EXCEPTION.getMessage()).put("data", map);
+    }
 
-
+    @ExceptionHandler(value = Throwable.class)
+    public R handleException(Throwable throwable) {
+        log.error("出现错误", throwable);
+        return R.error(BizCodeEnum.UN_KNOW_EXCEPTION.getCode(), BizCodeEnum.UN_KNOW_EXCEPTION.getMessage());
     }
 
 }
