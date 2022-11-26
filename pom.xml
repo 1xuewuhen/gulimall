@@ -24,5 +24,6 @@
         <module>renren-generator</module>
         <module>gulimall-gateway</module>
         <module>gulimall-common</module>
+        <module>gulimall-third-party</module>
     </modules>
 </project>
