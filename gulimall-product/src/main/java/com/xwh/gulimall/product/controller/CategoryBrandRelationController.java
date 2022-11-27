@@ -1,17 +1,20 @@
 package com.xwh.gulimall.product.controller;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.xwh.common.utils.PageUtils;
+import com.xwh.common.utils.R;
+import com.xwh.gulimall.product.entity.BrandEntity;
+import com.xwh.gulimall.product.entity.CategoryBrandRelationEntity;
+import com.xwh.gulimall.product.service.CategoryBrandRelationService;
+import com.xwh.gulimall.product.vo.BrandVo;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.xwh.gulimall.product.entity.CategoryBrandRelationEntity;
-import com.xwh.gulimall.product.service.CategoryBrandRelationService;
-import com.xwh.common.utils.PageUtils;
-import com.xwh.common.utils.R;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 /**
@@ -27,6 +30,22 @@ public class CategoryBrandRelationController {
     @Autowired
     private CategoryBrandRelationService categoryBrandRelationService;
 
+
+    /**
+     * /product/categorybrandrelation/brands/list
+     */
+    @GetMapping("/brands/list")
+    public R relationBrandsList(@RequestParam(value = "catId", required = true) Long catId) {
+        List<BrandEntity> vos = categoryBrandRelationService.getBrandsByCatId(catId);
+        List<BrandVo> collect = vos.stream().map(item -> {
+            BrandVo brandVo = new BrandVo();
+            brandVo.setBrandId(item.getBrandId());
+            brandVo.setBrandName(item.getName());
+            return brandVo;
+        }).collect(Collectors.toList());
+        return R.ok().put("data",collect);
+    }
+
     /**
      * 获取当前品牌关联所有分类列表
      * /product/categorybrandrelation/catelog/list
@@ -38,7 +57,7 @@ public class CategoryBrandRelationController {
         return R.ok().put("page", page);
     }
 
-    @RequestMapping(value = "/catelog/list",method = RequestMethod.GET)
+    @RequestMapping(value = "/catelog/list", method = RequestMethod.GET)
     public R catelogList(@RequestParam("brandId") Long brandId) {
         List<CategoryBrandRelationEntity> list = categoryBrandRelationService.list(
                 new LambdaQueryWrapper<CategoryBrandRelationEntity>().eq(CategoryBrandRelationEntity::getBrandId, brandId)

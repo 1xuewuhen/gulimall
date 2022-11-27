@@ -9,6 +9,7 @@ import com.xwh.gulimall.product.service.AttrAttrgroupRelationService;
 import com.xwh.gulimall.product.service.AttrService;
 import com.xwh.gulimall.product.service.CategoryService;
 import com.xwh.gulimall.product.vo.AttrGroupRelationVo;
+import com.xwh.gulimall.product.vo.AttrGroupWithAttrsVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,11 +40,21 @@ public class AttrGroupController {
 
     @Autowired
     private AttrAttrgroupRelationService relationService;
+
+    /**
+     * /product/attrgroup/{catelogId}/withattr
+     */
+    @GetMapping("/{catelogId}/withattr")
+    public R getAttrGroupWithAttrs(@PathVariable("catelogId") Long catelogId) {
+        List<AttrGroupWithAttrsVo> vos = attrGroupService.getAttrGroupWithAttrsByCatelogId(catelogId);
+        return R.ok().put("data",vos);
+    }
+
     /**
      * /product/attrgroup/attr/relation
      */
     @PostMapping("/attr/relation")
-    public R addRelation(@RequestBody List<AttrGroupRelationVo> vos){
+    public R addRelation(@RequestBody List<AttrGroupRelationVo> vos) {
         relationService.saveBatch(vos);
         return R.ok();
     }
@@ -54,7 +65,7 @@ public class AttrGroupController {
     @GetMapping("/{attrgroupId}/noattr/relation")
     public R attrNORelation(@RequestParam Map<String, Object> params,
                             @PathVariable("attrgroupId") Long attrgroupId) {
-        PageUtils page = attrService.getNoRelationAttr(params,attrgroupId);
+        PageUtils page = attrService.getNoRelationAttr(params, attrgroupId);
         return R.ok().put("page", page);
     }
 

@@ -69,6 +69,10 @@
     <orderEntry type="library" name="Maven: org.springframework.cloud:spring-cloud-commons:3.1.4" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.security:spring-security-crypto:5.6.7" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.cloud:spring-cloud-context:3.1.4" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.cloud:spring-cloud-loadbalancer:3.1.5" level="project" />
+    <orderEntry type="library" name="Maven: io.projectreactor:reactor-core:3.4.24" level="project" />
+    <orderEntry type="library" name="Maven: org.reactivestreams:reactive-streams:1.0.4" level="project" />
+    <orderEntry type="library" name="Maven: io.projectreactor.addons:reactor-extra:3.4.8" level="project" />
     <orderEntry type="library" name="Maven: com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config:2021.0.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.36" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.cloud:spring-cloud-starter-bootstrap:3.1.4" level="project" />

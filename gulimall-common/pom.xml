@@ -52,7 +52,20 @@
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.netflix.ribbon</groupId>
+                    <artifactId>ribbon</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-loadbalancer -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-loadbalancer</artifactId>
+            <version>3.1.5</version>
+        </dependency>
+
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>

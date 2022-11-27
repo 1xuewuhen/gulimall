@@ -20,6 +20,13 @@ spring:
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
 
+        - id: member_route
+          uri: http://127.0.0.1:8000
+          predicates:
+            - Path=/api/member/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
         - id: third_party_route
           uri: http://127.0.0.1:30000
           predicates:
