@@ -30,14 +30,14 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
 
     @Override
     public PageUtils queryPage(Map<String, Object> params, Long catelogId) {
+        LambdaQueryWrapper<AttrGroupEntity> wrapper = new LambdaQueryWrapper<>();
+        String key = (String) params.get("key");
+        if (!StringUtils.isEmpty(key)) {
+            wrapper.eq(AttrGroupEntity::getAttrGroupId, key)
+                    .or()
+                    .like(AttrGroupEntity::getAttrGroupName, key);
+        }
         if (catelogId == 0) {
-            LambdaQueryWrapper<AttrGroupEntity> wrapper = new LambdaQueryWrapper<>();
-            String key = (String) params.get("key");
-            if (!StringUtils.isEmpty(key)) {
-                wrapper.eq(AttrGroupEntity::getAttrGroupId, key)
-                        .or()
-                        .like(AttrGroupEntity::getAttrGroupName, key);
-            }
             IPage<AttrGroupEntity> page = this.page(
                     new Query<AttrGroupEntity>().getPage(params),
                     wrapper
@@ -45,16 +45,7 @@ public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEnt
 
             return new PageUtils(page);
         } else {
-            LambdaQueryWrapper<AttrGroupEntity> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(AttrGroupEntity::getCatelogId, catelogId);
-            String key = (String) params.get("key");
-            if (!StringUtils.isEmpty(key)) {
-                wrapper.and((obj) -> {
-                    obj.eq(AttrGroupEntity::getAttrGroupId, key)
-                            .or()
-                            .like(AttrGroupEntity::getAttrGroupName, key);
-                });
-            }
             IPage<AttrGroupEntity> page = this.page(
                     new Query<AttrGroupEntity>().getPage(params),
                     wrapper
