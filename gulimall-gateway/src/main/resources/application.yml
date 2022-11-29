@@ -14,28 +14,35 @@ spring:
             - Query=url,baidu
 
         - id: product_route
-          uri: http://127.0.0.1:10000
+          uri: lb://gulimall-product
           predicates:
             - Path=/api/product/**
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
 
         - id: member_route
-          uri: http://127.0.0.1:8000
+          uri: lb://gulimall-member
           predicates:
             - Path=/api/member/**
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
 
+        - id: ware_route
+          uri: lb://gulimall-ware
+          predicates:
+            - Path=/api/ware/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
+
         - id: third_party_route
-          uri: http://127.0.0.1:30000
+          uri: lb://gulimall-third-party
           predicates:
             - Path=/api/thirdparty/**
           filters:
             - RewritePath=/api/thirdparty/(?<segment>.*),/$\{segment}
 
         - id: admin_route
-          uri: http://127.0.0.1:8080
+          uri: lb://renren-fast
           predicates:
             - Path=/api/**
           filters:
