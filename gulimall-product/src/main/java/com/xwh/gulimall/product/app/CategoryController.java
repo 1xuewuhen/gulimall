@@ -1,6 +1,5 @@
-package com.xwh.gulimall.product.controller;
+package com.xwh.gulimall.product.app;
 
-import com.alibaba.nacos.shaded.org.checkerframework.checker.units.qual.A;
 import com.xwh.common.utils.R;
 import com.xwh.gulimall.product.entity.CategoryEntity;
 import com.xwh.gulimall.product.service.CategoryService;

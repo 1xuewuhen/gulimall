@@ -1,4 +1,4 @@
-package com.xwh.gulimall.product.controller;
+package com.xwh.gulimall.product.app;
 
 import java.util.Arrays;
 import java.util.List;

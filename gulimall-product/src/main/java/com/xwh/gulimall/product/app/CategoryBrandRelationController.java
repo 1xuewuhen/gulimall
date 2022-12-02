@@ -1,4 +1,4 @@
-package com.xwh.gulimall.product.controller;
+package com.xwh.gulimall.product.app;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xwh.common.utils.PageUtils;
@@ -7,7 +7,6 @@ import com.xwh.gulimall.product.entity.BrandEntity;
 import com.xwh.gulimall.product.entity.CategoryBrandRelationEntity;
 import com.xwh.gulimall.product.service.CategoryBrandRelationService;
 import com.xwh.gulimall.product.vo.BrandVo;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

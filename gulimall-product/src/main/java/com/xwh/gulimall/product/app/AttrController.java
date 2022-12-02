@@ -1,4 +1,4 @@
-package com.xwh.gulimall.product.controller;
+package com.xwh.gulimall.product.app;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +11,6 @@ import com.xwh.gulimall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import com.xwh.gulimall.product.entity.AttrEntity;
 import com.xwh.gulimall.product.service.AttrService;
 import com.xwh.common.utils.PageUtils;
 import com.xwh.common.utils.R;
