@@ -8,6 +8,9 @@ import com.xwh.gulimall.product.vo.Catelog2Vo;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -76,6 +79,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return paths.toArray(new Long[paths.size()]);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = {"category"}, key = "'level1Categorys'"),
+            @CacheEvict(value = {"category"}, key = "'getCatalogJson'")
+    })
     @Transactional
     @Override
     public void updateCascode(CategoryEntity category) {
@@ -83,17 +90,52 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
     }
 
+    @Cacheable(
+            value = {"category"},
+            key = "'level1Categorys'"
+    )
     @Override
     public List<CategoryEntity> getLevel1Categorys() {
         return baseMapper.selectList(new LambdaQueryWrapper<CategoryEntity>().eq(CategoryEntity::getParentCid, 0));
     }
 
 
+    @Cacheable(value = "category", key = "#root.methodName")
+    @Override
+    public Map<String, List<Catelog2Vo>> getCatalogJson() {
+        List<CategoryEntity> selectList = baseMapper.selectList(null);
+        //查出所有分类
+        List<CategoryEntity> level1Categorys = getParent_cid(selectList, 0L);
+        Map<String, List<Catelog2Vo>> parent_id = level1Categorys.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), v -> {
+            //每一个以及分类
+            List<CategoryEntity> categoryEntities = getParent_cid(selectList, v.getCatId());
+            // 封装上面的结果
+            List<Catelog2Vo> catelog2Vos = null;
+            if (categoryEntities != null) {
+                catelog2Vos = categoryEntities.stream().map(l2 -> {
+                    Catelog2Vo catelog2Vo = new Catelog2Vo(v.getCatId().toString(), null, l2.getCatId().toString(), l2.getName());
+                    // 找当前二级分类的三级分类封装成vo
+                    List<CategoryEntity> level3Catelog = getParent_cid(selectList, l2.getCatId());
+                    if (level3Catelog != null) {
+                        List<Catelog2Vo.Catelog3Vo> collect = level3Catelog.stream().map(l3 -> {
+                            // 封装制定格式
+                            return new Catelog2Vo.Catelog3Vo(l2.getCatId().toString(), l3.getCatId().toString(), l3.getName());
+                        }).collect(Collectors.toList());
+                        catelog2Vo.setCatalog3List(collect);
+                    }
+                    return catelog2Vo;
+                }).collect(Collectors.toList());
+            }
+            return catelog2Vos;
+        }));
+        return parent_id;
+    }
+
     //TODO 在虚拟机中有可能会有堆外溢出异常，在ubuntu系统中没有这个异常
     //  低版本的redis依赖有问题，目前使用的redis依赖没有出现异常
     //  升级后的lettuce没有问题可以直接使用
-    @Override
-    public Map<String, List<Catelog2Vo>> getCatalogJson() {
+//    @Override
+    public Map<String, List<Catelog2Vo>> getCatalogJson2() {
 
         /**
          * 加入空结果缓存，解决缓存穿透问题
@@ -132,8 +174,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     /**
      * 缓存里面的数据如何和数据库保持一致
      * 缓存数据的一致性
-     *  双写模式
-     *  失效模式
+     * 双写模式
+     * 失效模式
+     *
      * @return
      */
     private Map<String, List<Catelog2Vo>> getCatalogJsonFromDbWithRedissionisLock() {
@@ -146,7 +189,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         try {
             System.out.println("分布式锁成功");
             dataFromDb = getDataFromDb();
-        }finally {
+        } finally {
             lock.unlock();
         }
         return dataFromDb;
