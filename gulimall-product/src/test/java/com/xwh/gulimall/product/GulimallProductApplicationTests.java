@@ -7,21 +7,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
-import java.util.concurrent.TimeUnit;
-
 @SpringBootTest
 class GulimallProductApplicationTests {
 
-    /**
-     * 用户登录名称 cfy-xwh@1562923757844605.onaliyun.com
-     * AccessKey ID LTAI5tPNR9fA2Tu1vk8zAPGf
-     * AccessKey Secret wAMKLtrXDBBpntB5CkFVIu6Giz5QXe
-     * <p>
-     * <p>
-     * 用户登录名称 gulimall@1562923757844605.onaliyun.com
-     * AccessKey ID LTAI5tNQ9u58Jh4RWv2Menk9
-     * AccessKey Secret n7DaMqLlGdb72SrhnG9QJrvFRhLsIO
-     */
 
     @Autowired
     StringRedisTemplate stringRedisTemplate;
