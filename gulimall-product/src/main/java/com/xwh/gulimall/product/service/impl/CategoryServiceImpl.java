@@ -92,7 +92,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Cacheable(
             value = {"category"},
-            key = "'level1Categorys'"
+            key = "'level1Categorys'",
+            sync = true
     )
     @Override
     public List<CategoryEntity> getLevel1Categorys() {
@@ -106,7 +107,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         List<CategoryEntity> selectList = baseMapper.selectList(null);
         //查出所有分类
         List<CategoryEntity> level1Categorys = getParent_cid(selectList, 0L);
-        Map<String, List<Catelog2Vo>> parent_id = level1Categorys.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), v -> {
+        return level1Categorys.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), v -> {
             //每一个以及分类
             List<CategoryEntity> categoryEntities = getParent_cid(selectList, v.getCatId());
             // 封装上面的结果
@@ -128,7 +129,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
             }
             return catelog2Vos;
         }));
-        return parent_id;
     }
 
     //TODO 在虚拟机中有可能会有堆外溢出异常，在ubuntu系统中没有这个异常
