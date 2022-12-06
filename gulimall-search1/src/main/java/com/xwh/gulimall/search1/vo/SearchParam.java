@@ -14,7 +14,7 @@ public class SearchParam {
 
     private String sort;
 
-    private Integer hasStock = 1;
+    private Integer hasStock;
 
     private String skuPrice;
 

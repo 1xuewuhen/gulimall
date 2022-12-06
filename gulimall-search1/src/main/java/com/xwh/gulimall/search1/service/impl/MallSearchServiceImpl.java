@@ -86,7 +86,7 @@ public class MallSearchServiceImpl implements MallSearchService {
                 esModels.add(esModel);
             }
         }
-        result.setProduct(esModels);
+        result.setProducts(esModels);
 
         List<SearchResult.AttrVo> attrVos = new ArrayList<>();
         ParsedNested attr_agg = response.getAggregations().get("attr_agg");
@@ -138,6 +138,12 @@ public class MallSearchServiceImpl implements MallSearchService {
         int totalPages = (int) (total % EsConstant.PRODUCT_PAGE_SIZE == 0 ? total / EsConstant.PRODUCT_PAGE_SIZE : (total / EsConstant.PRODUCT_PAGE_SIZE + 1));
         result.setTotalPages(totalPages);
 
+        List<Integer> pageNavs = new ArrayList<>();
+        for (int i = 1; i < totalPages; i++) {
+            pageNavs.add(i);
+        }
+        result.setPageNavs(pageNavs);
+
         return result;
     }
 
@@ -165,7 +171,9 @@ public class MallSearchServiceImpl implements MallSearchService {
         if (param.getBrandId() != null && param.getBrandId().size() > 0) {
             boolQuery.filter(QueryBuilders.termsQuery("brandId", param.getBrandId()));
         }
-        boolQuery.filter(QueryBuilders.termQuery("hasStock", param.getHasStock() == 1));
+        if (param.getHasStock() != null) {
+            boolQuery.filter(QueryBuilders.termQuery("hasStock", param.getHasStock() == 1));
+        }
         if (!StringUtils.isEmpty(param.getSkuPrice())) {
             RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("skuPrice");
             String[] s = param.getSkuPrice().split("_");

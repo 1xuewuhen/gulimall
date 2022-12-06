@@ -9,13 +9,15 @@ import java.util.List;
 @Data
 public class SearchResult {
 
-    private List<SkuEsModel> product;
+    private List<SkuEsModel> products;
 
     private Integer pageNum;
 
     private Long total;
 
     private Integer totalPages;
+
+    private List<Integer> pageNavs;
 
     private List<BrandVo> brands;
 
