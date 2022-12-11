@@ -3,6 +3,7 @@ package com.xwh.gulimall.search1.vo;
 import com.xwh.common.to.es.SkuEsModel;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,6 +25,17 @@ public class SearchResult {
     private List<AttrVo> attrs;
 
     private List<CatalogVo> catalogs;
+
+    private List<NavVo> navs = new ArrayList<>();
+
+    private List<Long> attrIds = new ArrayList<>();
+
+    @Data
+    public static class NavVo{
+        private String navName;
+        private String navValue;
+        private String link;
+    }
 
     @Data
     public static class BrandVo{

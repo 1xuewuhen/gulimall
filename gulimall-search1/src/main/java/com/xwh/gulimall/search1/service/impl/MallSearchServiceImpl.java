@@ -1,10 +1,15 @@
 package com.xwh.gulimall.search1.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.xwh.common.to.es.SkuEsModel;
+import com.xwh.common.utils.R;
 import com.xwh.gulimall.search1.config.GulimallElasticSearchConfig;
 import com.xwh.gulimall.search1.constant.EsConstant;
+import com.xwh.gulimall.search1.feign.ProductFeignService;
 import com.xwh.gulimall.search1.service.MallSearchService;
+import com.xwh.gulimall.search1.vo.AttrRespVo;
+import com.xwh.gulimall.search1.vo.BrandVo;
 import com.xwh.gulimall.search1.vo.SearchParam;
 import com.xwh.gulimall.search1.vo.SearchResult;
 import org.apache.lucene.search.join.ScoreMode;
@@ -17,13 +22,14 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ParsedNested;
-import org.elasticsearch.search.aggregations.bucket.terms.*;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedLongTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
@@ -33,6 +39,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,6 +51,9 @@ public class MallSearchServiceImpl implements MallSearchService {
 
     @Autowired
     private RestHighLevelClient client;
+
+    @Autowired
+    private ProductFeignService productFeignService;
 
     @Override
     public SearchResult search(SearchParam param) {
@@ -144,7 +155,63 @@ public class MallSearchServiceImpl implements MallSearchService {
         }
         result.setPageNavs(pageNavs);
 
+        if (param.getAttrs() != null && param.getAttrs().size() > 0) {
+            List<SearchResult.NavVo> navVos = param.getAttrs().stream().map(attr -> {
+                SearchResult.NavVo navVo = new SearchResult.NavVo();
+                String[] s = attr.split("_");
+                navVo.setNavValue(s[1]);
+//            navVo.setNavName();
+                R r = productFeignService.attrInfo(Long.parseLong(s[0]));
+                result.getAttrIds().add(Long.parseLong(s[0]));
+                if (r.getCode() == 0) {
+                    AttrRespVo data = r.getDate("attr", new TypeReference<AttrRespVo>() {
+                    });
+                    navVo.setNavName(data.getAttrName());
+                } else {
+                    navVo.setNavName(s[0]);
+                }
+                String replace = replaceQueryString(param, attr, "attrs");
+                navVo.setLink("http://search.gulimall.com/list.html?" + replace);
+                return navVo;
+            }).collect(Collectors.toList());
+            result.setNavs(navVos);
+        }
+        if (param.getBrandId() != null && param.getBrandId().size() > 0) {
+            List<SearchResult.NavVo> navs = result.getNavs();
+            SearchResult.NavVo navVo = new SearchResult.NavVo();
+            navVo.setNavName("品牌");
+            //TODO 远程查询所有品牌
+            R r = productFeignService.brandInfo(param.getBrandId());
+            if (r.getCode() == 0) {
+                List<BrandVo> brand = r.getDate(new TypeReference<List<BrandVo>>() {
+                });
+                StringBuffer buffer = new StringBuffer();
+                String replace = "";
+                for (BrandVo brandVo : brand) {
+                    buffer.append(brandVo.getBrandName() + ";");
+                    replace = replaceQueryString(param, brandVo.getBrandId() + "", "brandId");
+                }
+                navVo.setNavValue(buffer.toString());
+                navVo.setLink("http://search.gulimall.com/list.html?" + replace);
+            }
+            navs.add(navVo);
+        }
+
+        //TODO 分类，不需要分类取消
+
         return result;
+    }
+
+    private String replaceQueryString(SearchParam param, String value, String key) {
+        String encode = null;
+        try {
+            encode = URLEncoder.encode(value, "UTF-8");
+            encode = encode.replace("+", "%20");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        String replace = param.get_queryString().replace("&" + key + "=" + encode, "");
+        return replace;
     }
 
 

@@ -765,6 +765,11 @@
                 <a href="/static/search/#">游戏手机</a>
             </div>
         </div>
+        <!--面包屑导航-->
+        <div class="JD_ipone_one c">
+            <a th:href="${nav.link}" th:each="nav:${result.navs}"><span th:text="${nav.navName}"></span>:<span
+                    th:text="${nav.navValue}"></span> ×</a>
+        </div>
         <i><img src="/static/search/image/right-@1x.png" alt=""></i>
     </div>
 </div>
@@ -778,9 +783,9 @@
                 <h3><b>手机</b><em>商品筛选</em></h3>
                 <div class="st-ext">共&nbsp;<span>10135</span>个商品</div>
             </div>
-            <div class="JD_nav_logo">
+            <div class="JD_nav_logo" th:with="brandId=${param.brandId}">
                 <!--品牌-->
-                <div class="JD_nav_wrap">
+                <div th:if="${#strings.isEmpty(brandId)}" class="JD_nav_wrap">
                     <div class="sl_key">
                         <span><b>品牌：</b>></span>
                     </div>
@@ -839,7 +844,7 @@
                     </div>
                 </div>
                 <!--其他属性-->
-                <div class="JD_pre" th:each="attr:${result.attrs}">
+                <div class="JD_pre" th:each="attr:${result.attrs}" th:if="${!#lists.contains(result.attrIds,attr.attrId)}">
                     <div class="sl_key">
                         <span th:text="${attr.attrName}">屏幕尺寸：</span>
                     </div>
@@ -1196,7 +1201,7 @@
                                 <a href="/static/search/#">关注</a>
                             </div>
                             <p class="da">
-                                <a href="/static/search/#">
+                                <a th:href="|http://item.gulimall.com/${product.skuId}.html|">
                                     <img th:src="${product.skuImg}" class="dim">
                                 </a>
                             </p>
@@ -2002,7 +2007,7 @@
     })
 
     function searchProducts(name, value) {
-        location.href = replaceAddParamVal(location.href, name, value)
+        location.href = replaceAddParamVal(location.href, name, value, false)
     }
 
     function searchByKeyword() {
@@ -2020,12 +2025,22 @@
         return false
     })
 
-    function replaceAddParamVal(url, paramName, replaceVal) {
+    function replaceAddParamVal(url, paramName, replaceVal, forceAdd) {
         let oUrl = url.toString()
         if (oUrl.indexOf(paramName) != -1) {
-            let re = eval('/(' + paramName + '=)([^&]*)/gi')
-            let nUrl = oUrl.replace(re, paramName + '=' + replaceVal)
-            return nUrl
+            if (forceAdd) {
+                let nUrl = ''
+                if (oUrl.indexOf('?') != -1) {
+                    nUrl = oUrl + "&" + paramName + '=' + replaceVal
+                } else {
+                    nUrl = oUrl + "?" + paramName + '=' + replaceVal
+                }
+                return nUrl
+            } else {
+                let re = eval('/(' + paramName + '=)([^&]*)/gi')
+                let nUrl = oUrl.replace(re, paramName + '=' + replaceVal)
+                return nUrl
+            }
         } else {
             let nUrl = ''
             if (oUrl.indexOf('?') != -1) {

@@ -24,4 +24,6 @@ public class SearchParam {
 
     private Integer pageNum = 1;
 
+    private String _queryString;
+
 }
