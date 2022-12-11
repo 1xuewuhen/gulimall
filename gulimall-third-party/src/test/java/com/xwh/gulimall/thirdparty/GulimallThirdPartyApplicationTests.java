@@ -3,7 +3,7 @@ package com.xwh.gulimall.thirdparty;
 import com.aliyun.oss.ClientException;
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.OSSException;
-import com.xwh.gulimall.thirdparty.util.HttpUtils;
+import com.xwh.common.utils.HttpUtils;
 import org.apache.http.HttpResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.xwh.gulimall.thirdparty.util;
+package com.xwh.common.utils;
 
 
 import java.io.UnsupportedEncodingException;

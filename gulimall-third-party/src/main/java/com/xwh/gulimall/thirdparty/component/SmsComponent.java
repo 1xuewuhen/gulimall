@@ -1,7 +1,7 @@
 package com.xwh.gulimall.thirdparty.component;
 
 
-import com.xwh.gulimall.thirdparty.util.HttpUtils;
+import com.xwh.common.utils.HttpUtils;
 import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

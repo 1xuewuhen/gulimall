@@ -19,4 +19,6 @@ public class GulimallWebConfig implements WebMvcConfigurer {
     public BCryptPasswordEncoder encoder(){
         return new BCryptPasswordEncoder();
     }
+
+
 }

@@ -9,6 +9,7 @@ import com.xwh.gulimall.member.exception.UsernameExistException;
 import com.xwh.gulimall.member.service.MemberService;
 import com.xwh.gulimall.member.vo.MemberLoginVo;
 import com.xwh.gulimall.member.vo.MemberRegistVo;
+import com.xwh.gulimall.member.vo.SocialUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,6 +45,21 @@ public class MemberController {
         MemberEntity entity = memberService.login(vo);
         if (entity != null) {
             return R.ok();
+        } else {
+            return R.error(BizCodeEnum.LOGINACCT_PASSWORD_INVAILD_EXCEPTION.getCode(), BizCodeEnum.LOGINACCT_PASSWORD_INVAILD_EXCEPTION.getMessage());
+        }
+    }
+
+    @PostMapping("/oauth2/login")
+    public R oauth2Login(@RequestBody SocialUser socialUser) {
+        MemberEntity entity = null;
+        try {
+            entity = memberService.login(socialUser);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (entity != null) {
+            return R.ok().setDate(entity);
         } else {
             return R.error(BizCodeEnum.LOGINACCT_PASSWORD_INVAILD_EXCEPTION.getCode(), BizCodeEnum.LOGINACCT_PASSWORD_INVAILD_EXCEPTION.getMessage());
         }
