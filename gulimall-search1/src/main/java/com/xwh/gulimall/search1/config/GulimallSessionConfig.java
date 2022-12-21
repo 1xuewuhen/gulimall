@@ -1,4 +1,4 @@
-package com.xwh.gulimall.product.config;
+package com.xwh.gulimall.search1.config;
 
 
 import com.alibaba.fastjson.support.spring.GenericFastJsonRedisSerializer;

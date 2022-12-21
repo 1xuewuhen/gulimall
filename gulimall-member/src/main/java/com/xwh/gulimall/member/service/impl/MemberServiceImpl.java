@@ -62,6 +62,7 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
         checkUserNameUnique(vo.getUserName());
         memberEntity.setUsername(vo.getUserName());
         memberEntity.setMobile(vo.getPhone());
+        memberEntity.setNickname(vo.getUserName());
         baseMapper.insert(memberEntity);
     }
 
