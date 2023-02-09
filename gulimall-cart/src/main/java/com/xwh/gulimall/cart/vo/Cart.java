@@ -1,7 +1,5 @@
 package com.xwh.gulimall.cart.vo;
 
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -11,7 +9,7 @@ public class Cart {
     private Integer countNum;
     private Integer countType;
     private BigDecimal totalAmount;
-    private BigDecimal reduce = new BigDecimal("0.0");
+    private BigDecimal reduce = new BigDecimal("0.00");
 
     public List<CartItem> getItems() {
         return items;
@@ -128,6 +126,11 @@ public class Cart {
             this.count = count;
         }
 
+        /**
+         * 计算购物项
+         *
+         * @return
+         */
         public BigDecimal getTotalPrice() {
             return this.price.multiply(new BigDecimal(this.count + ""));
         }

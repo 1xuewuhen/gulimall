@@ -59,11 +59,14 @@
             </ul>
             <ul class="header_ul_right">
                 <li style="border: 0;">
-<!--                    <a href="/static/item/../登录页面\index.html" class="aa">你好，请登录</a>-->
+                    <!--                    <a href="/static/item/../登录页面\index.html" class="aa">你好，请登录</a>-->
                     <a th:if="${session.loginUser!=null}">欢迎：[[${session?.loginUser?.nickname}]]</a>
-                    <a href="http://auth.gulimall.com/login.html" th:if="${session.loginUser==null}" class="aa">欢迎：请登录</a>
+                    <a href="http://auth.gulimall.com/login.html" th:if="${session.loginUser==null}"
+                       class="aa">欢迎：请登录</a>
                 </li>
-                <li><a th:if="${session.loginUser==null}" href="http://auth.gulimall.com/reg.html" style="color: red;">免费注册</a> |</li>
+                <li><a th:if="${session.loginUser==null}" href="http://auth.gulimall.com/reg.html" style="color: red;">免费注册</a>
+                    |
+                </li>
                 <li><a href="/static/item/javascript:;" class="aa">我的订单</a> |</li>
                 <li class="jingdong"><a href="/static/item/javascript:;">我的京东</a><span
                         class="glyphicon glyphicon-menu-down">|</span>
@@ -627,7 +630,7 @@
 
                 <div class="box-btns clear">
                     <div class="box-btns-one">
-                        <input type="text" name="" id="" value="1"/>
+                        <input type="text" name="" id="numInput" value="1"/>
                         <div class="box-btns-one1">
 
                             <div>
@@ -644,8 +647,8 @@
                         </div>
                     </div>
                     <div class="box-btns-two">
-                        <a href="/static/item/../商品分类\index.html">
-                            立即预约
+                        <a href="#" id="addToCartA" th:attr="skuId=${item.info.skuId}">
+                            加入购物车
                         </a>
                     </div>
                     <div class="box-btns-three">
@@ -1320,17 +1323,24 @@
             skus.push($(this).attr('skus').split(','))
         })
         // var filter = $(skus[0]).filter(skus[1])[0];
-        let  filter = skus[0]
+        let filter = skus[0]
         for (let i = 1; i < skus.length; i++) {
             filter = $(filter).filter(skus[i])
         }
         // console.log(filter)
-        location.href = "http://item.gulimall.com/"+filter[0]+".html"
+        location.href = "http://item.gulimall.com/" + filter[0] + ".html"
     })
 
     $(function () {
         $('.sku_attr_value').parent().css({'border': 'solid 1px #CCC'})
         $('a[class="sku_attr_value checked"]').parent().css({'border': 'solid 1px red'})
+    })
+
+    $("#addToCartA").click(function () {
+        let num = $("#numInput").val();
+        let skuId = $(this).attr("skuId");
+        location.href = "http://cart.gulimall.com/addToCart?skuId="+skuId+"&num="+num
+        return false;
     })
 </script>
 </html>

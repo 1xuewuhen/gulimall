@@ -97,10 +97,10 @@ class GulimallThirdPartyApplicationTests {
 
     @Test
     public void test04() {
-        String code = "1234567890";
+        String code = "1234567890asdfghjklqwertyuiopzxcvbnmASDFGHJKLZXCVBNMQWERTYUIOP";
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < 4; i++) {
-            int j = new Random().nextInt(10);
+        for (int i = 0; i < 6; i++) {
+            int j = new Random().nextInt(code.length());
             builder.append(code.charAt(j));
         }
 //        System.out.println(new Random().nextInt(10));
