@@ -8,6 +8,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -20,7 +21,7 @@ import com.xwh.gulimall.order.dao.OrderItemDao;
 import com.xwh.gulimall.order.entity.OrderItemEntity;
 import com.xwh.gulimall.order.service.OrderItemService;
 
-//@RabbitListener(queues = {"hello-java-queue"})
+@RabbitListener(queues = {"hello-java-queue"})
 @Service("orderItemService")
 public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEntity> implements OrderItemService {
 
@@ -40,13 +41,24 @@ public class OrderItemServiceImpl extends ServiceImpl<OrderItemDao, OrderItemEnt
      *
      * @param message
      */
-//    @RabbitHandler
+    @RabbitHandler
     public void recieveMessage(Message message,
                                Map<String, Object> map,
-                               Channel channel) {
+                               Channel channel){
         byte[] body = message.getBody();
         MessageProperties messageProperties = message.getMessageProperties();
         System.out.printf("接受到消息....内容:{%s}\n", map);
+        long deliveryTag = messageProperties.getDeliveryTag();
+        System.out.println("deliveryTag==>" + deliveryTag);
+        // 签收货物
+        try {
+            channel.basicAck(deliveryTag, false);
+//            channel.basicNack(deliveryTag,false,false);
+//            channel.basicReject();
+        } catch (IOException e) {
+            // 网络中断
+            e.printStackTrace();
+        }
     }
 
 }

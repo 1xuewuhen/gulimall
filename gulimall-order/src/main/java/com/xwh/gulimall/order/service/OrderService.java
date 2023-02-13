@@ -3,8 +3,10 @@ package com.xwh.gulimall.order.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xwh.common.utils.PageUtils;
 import com.xwh.gulimall.order.entity.OrderEntity;
+import com.xwh.gulimall.order.vo.OrderConfirmVo;
 
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 /**
  * 订单
@@ -16,5 +18,7 @@ import java.util.Map;
 public interface OrderService extends IService<OrderEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    OrderConfirmVo confirmOrder() throws ExecutionException, InterruptedException;
 }
 

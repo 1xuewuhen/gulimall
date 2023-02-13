@@ -59,14 +59,21 @@ spring:
           uri: lb://gulimall-search1
           predicates:
             - Host=search.gulimall.com
+
         - id: gulimall_auth_route
           uri: lb://gulimall-auth-server
           predicates:
             - Host=auth.gulimall.com
+
         - id: gulimall_cart_route
           uri: lb://gulimall-cart
           predicates:
             - Host=cart.gulimall.com
+
+        - id: gulimall_order_route
+          uri: lb://gulimall-order
+          predicates:
+            - Host=order.gulimall.com
 
         - id: gulimall_host_route
           uri: lb://gulimall-product

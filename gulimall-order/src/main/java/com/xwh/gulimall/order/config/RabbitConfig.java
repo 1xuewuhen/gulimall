@@ -21,6 +21,16 @@ public class RabbitConfig {
      * 定制RabbitTemplate
      * 只要消息抵达服务器broker就ack=true
      * 对象创建完成以后，执行这个方法
+     *
+     * 1、服务收到消息就回调
+     *      1、spring.rabbitma.publisher-configms=true
+     *      2、设置确认毁掉ConfirmCallback
+     * 2、消息正确抵达队列进行回调
+     *      1、spring.rabbitmq.publish-returns=true
+     *         spring.rabbitmq.template.mandatory=true
+     *      2、设置确认回调ReturnCallback
+     * 3、消费端确认（保证每个消息被正确消费。此时才可以broker删除这个消息）
+     *      1、默认是自动删除的。只要消息收到，客户端会自动确认，服务端就会移除这个消息
      */
     @PostConstruct
     public void init() {

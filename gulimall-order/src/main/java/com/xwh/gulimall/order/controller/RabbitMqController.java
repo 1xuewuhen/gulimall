@@ -24,7 +24,7 @@ public class RabbitMqController {
             Map<String,Object> map = new HashMap<>();
             map.put("name","张三");
             map.put("age",26);
-            rabbitTemplate.convertAndSend("hello-java-exchange","hello-1java",map,new CorrelationData(UUID.randomUUID().toString()));
+            rabbitTemplate.convertAndSend("hello-java-exchange","hello-java",map,new CorrelationData(UUID.randomUUID().toString()));
 //            log.info("消息发送完成{}",map);
         }
         return "ok";
