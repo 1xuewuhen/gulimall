@@ -2,8 +2,12 @@ package com.xwh.gulimall.ware.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xwh.common.utils.R;
+import com.xwh.common.exception.NoStockException;
 import com.xwh.gulimall.ware.feign.ProductFeignService;
 import com.xwh.common.to.SkuHasStockVo;
+import com.xwh.gulimall.ware.vo.OrderItemVo;
+import com.xwh.gulimall.ware.vo.WareSkuLockVo;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +23,7 @@ import com.xwh.common.utils.Query;
 import com.xwh.gulimall.ware.dao.WareSkuDao;
 import com.xwh.gulimall.ware.entity.WareSkuEntity;
 import com.xwh.gulimall.ware.service.WareSkuService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 
@@ -103,6 +108,57 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             return vo;
         }).collect(Collectors.toList());
 
+    }
+
+    /**
+     * 为某个订单锁定库存
+     *
+     * @param vo
+     * @return
+     */
+
+    @Transactional(rollbackFor = {NoStockException.class})
+    @Override
+    public Boolean orderLockStock(WareSkuLockVo vo) {
+        List<OrderItemVo> locks = vo.getLocks();
+        List<SkuWareHasStock> collect = locks.stream().map(item -> {
+            SkuWareHasStock stock = new SkuWareHasStock();
+            Long skuId = item.getSkuId();
+            stock.setSkuId(skuId);
+            List<Long> wareId = wareSkuDao.listWareIdHasSkuStock(skuId);
+            stock.setWareId(wareId);
+            stock.setNum(item.getCount());
+            return stock;
+        }).collect(Collectors.toList());
+        for (SkuWareHasStock hasStock : collect) {
+            boolean skuStocked = false;
+            Long skuId = hasStock.getSkuId();
+            List<Long> wareIds = hasStock.getWareId();
+            if (wareIds == null || wareIds.size() == 0) {
+                // 没有任何仓库有这个商品的库存
+                throw new NoStockException(skuId);
+            }
+            for (Long wareId : wareIds) {
+                Long count = wareSkuDao.lockSkuStock(skuId,wareId,hasStock.getNum());
+                if (count == 1){
+                    skuStocked = true;
+                    break;
+                }
+            }
+            if (!skuStocked){
+                throw new NoStockException(skuId);
+
+            }
+        }
+
+        return true;
+    }
+
+    @Data
+    static class SkuWareHasStock {
+        private Long skuId;
+        private Integer num;
+        private List<Long> wareId;
     }
 
 }
