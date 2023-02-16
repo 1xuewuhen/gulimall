@@ -34,10 +34,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -138,7 +135,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         String script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
         String orderToken = vo.getOrderToken();
         // 原子验证令牌和删除令牌
-        Long result = redisTemplate.execute(new DefaultRedisScript<>(script, Long.class), List.of(OrderConstant.USER_ORDER_TOKEN_PREFIX + memberRespVo.getId()), orderToken);
+        Long result = redisTemplate.execute(new DefaultRedisScript<>(script, Long.class), Collections.singletonList(OrderConstant.USER_ORDER_TOKEN_PREFIX + memberRespVo.getId()), orderToken);
         if (result == 0L) {
             // 令牌验证失败
             return response;
@@ -248,7 +245,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         entity.setMemberId(memberRespVo.getId());
         //获取收货地址信息
         R r = wareFeignService.getFare(submitVo.getAddrId());
-        FareVo fareResp = r.getDate(new TypeReference<>() {
+        FareVo fareResp = r.getDate(new TypeReference<FareVo>() {
         });
         entity.setFreightAmount(fareResp.getFare());
         //设置收获人信息

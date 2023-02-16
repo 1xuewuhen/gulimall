@@ -90,7 +90,7 @@ public class OAuth2Controller {
         HttpResponse response = HttpUtils.doGet("https://gitee.com", "/api/v5/user", "get", new HashMap<>(), map);
         if (response.getStatusLine().getStatusCode() == 200){
             String s = EntityUtils.toString(response.getEntity());
-            return JSON.parseObject(s,new TypeReference<>(){});
+            return JSON.parseObject(s,new TypeReference<Map<String, String>>(){});
         }else {
             return null;
         }
