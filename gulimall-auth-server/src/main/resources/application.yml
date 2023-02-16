@@ -1,34 +1,3 @@
-spring:
-  datasource:
-    username: root
-    password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/gulimall-sms
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 127.0.0.1:8848
-
-  application:
-    name: gulimall-coupon
-
-
-
-#  config:
-#    import:
-#      - optional:nacos:spring-config-import-example.yaml
-
-
-mybatis-plus:
-  mapper-locations: classpath*:/mapper/**/*.xml
-  global-config:
-    db-config:
-      id-type: auto
-
-
-server:
-  port: 7000
-
 seata:
   enabled: true
   application-id: ${spring.application.name}

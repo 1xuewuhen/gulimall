@@ -24,6 +24,7 @@ import com.xwh.gulimall.order.service.OrderItemService;
 import com.xwh.gulimall.order.service.OrderService;
 import com.xwh.gulimall.order.to.OrderCreateTo;
 import com.xwh.gulimall.order.vo.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -124,6 +125,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         return confirmVo;
     }
 
+    @GlobalTransactional
     @Transactional
     @Override
     public SubmitOrderResponseVo submitOrder(OrderSubmitVo vo) {
@@ -138,6 +140,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         Long result = redisTemplate.execute(new DefaultRedisScript<>(script, Long.class), Collections.singletonList(OrderConstant.USER_ORDER_TOKEN_PREFIX + memberRespVo.getId()), orderToken);
         if (result == 0L) {
             // 令牌验证失败
+            response.setCode(1);
             return response;
         } else {
             //令牌验证成功
@@ -161,6 +164,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 R r = wareFeignService.orderLockStock(lockVo);
                 if (r.getCode() == 0) {
                     response.setOrder(order.getOrder());
+                    response.setCode(3);
+//                    int i = 10/0;
                     return response;
                 } else {
 //                    response.setCode(3);
