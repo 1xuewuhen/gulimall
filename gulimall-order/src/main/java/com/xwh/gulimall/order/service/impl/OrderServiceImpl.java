@@ -170,7 +170,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 if (r.getCode() == 0) {
                     response.setOrder(order.getOrder());
 //                    response.setCode(3);
-//                    int i = 10/0;
+                    int i = 10/0;
                     return response;
                 } else {
                     response.setCode(3);
