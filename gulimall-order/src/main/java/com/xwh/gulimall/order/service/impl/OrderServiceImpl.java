@@ -164,11 +164,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 R r = wareFeignService.orderLockStock(lockVo);
                 if (r.getCode() == 0) {
                     response.setOrder(order.getOrder());
-                    response.setCode(3);
+//                    response.setCode(3);
 //                    int i = 10/0;
                     return response;
                 } else {
-//                    response.setCode(3);
+                    response.setCode(3);
                     String msg = (String) r.get("msg");
 //                    return response;
                     throw new NoStockException(msg);
