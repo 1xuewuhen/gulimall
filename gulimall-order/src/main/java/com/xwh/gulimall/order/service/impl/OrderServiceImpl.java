@@ -125,7 +125,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         return confirmVo;
     }
 
-    @GlobalTransactional
+    /**
+     * 选择最终一直性
+     * @param vo
+     * @return
+     */
+//    @GlobalTransactional
     @Transactional
     @Override
     public SubmitOrderResponseVo submitOrder(OrderSubmitVo vo) {

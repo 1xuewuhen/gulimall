@@ -16,6 +16,7 @@ import com.xwh.gulimall.product.feign.SearchFeignService;
 import com.xwh.gulimall.product.feign.WareFeighService;
 import com.xwh.gulimall.product.service.*;
 import com.xwh.gulimall.product.vo.*;
+import io.seata.spring.annotation.GlobalTransactional;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -88,9 +89,11 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
 
     /**
      * TODO 高级部分完善
+     *  seata AT 分布式事务
      *
      * @param vo
      */
+    @GlobalTransactional
     @Transactional
     @Override
     public void saveSpuInfo(SpuSaveVo vo) {

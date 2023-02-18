@@ -11,6 +11,7 @@ public class MyRabbitMqConfig {
 
     @Bean
     public MessageConverter messageConverter() {
+
         return new Jackson2JsonMessageConverter();
     }
 

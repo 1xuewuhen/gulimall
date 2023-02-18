@@ -1,6 +1,7 @@
 package com.xwh.gulimall.order.web;
 
 
+import com.xwh.common.exception.NoStockException;
 import com.xwh.gulimall.order.service.OrderService;
 import com.xwh.gulimall.order.vo.OrderConfirmVo;
 import com.xwh.gulimall.order.vo.OrderSubmitVo;
@@ -40,23 +41,35 @@ public class OrderWebController {
      */
     @PostMapping("/submitOrder")
     public String submitOrder(OrderSubmitVo vo, Model model, RedirectAttributes redirectAttributes) {
-        SubmitOrderResponseVo responseVo = orderService.submitOrder(vo);
-        // 下单成功来支付选择页
-        // 下单失败回到订单确认页重新确认订单信息
-        if (responseVo.getCode() == 0) {
-            model.addAttribute("submitOrderResp", responseVo);
-            return "pay";
-        } else {
-            String msg = "";
-            switch (responseVo.getCode()) {
-                case 1 : msg += "订单信息过期，请刷新再次提交";
-                break;
-                case 2 : msg += "订单商品价格发生变化，请确认后再次提交";
-                break;
-                case 3 : msg += "库存锁定失败，商品库存不足";
-                break;
+        String msg = "";
+        try {
+            SubmitOrderResponseVo responseVo = orderService.submitOrder(vo);
+            // 下单成功来支付选择页
+            // 下单失败回到订单确认页重新确认订单信息
+            if (responseVo.getCode() == 0) {
+                model.addAttribute("submitOrderResp", responseVo);
+                return "pay";
+            } else {
+                switch (responseVo.getCode()) {
+                    case 1:
+                        msg += "订单信息过期，请刷新再次提交";
+                        break;
+                    case 2:
+                        msg += "订单商品价格发生变化，请确认后再次提交";
+                        break;
+                    case 3:
+                        msg += "库存锁定失败，商品库存不足";
+                        break;
+                }
+                redirectAttributes.addFlashAttribute("msg", msg);
+                return "redirect:http://order.gulimall.com/toTrade";
             }
-            redirectAttributes.addFlashAttribute("msg", msg);
+        } catch (Exception e) {
+            if (e instanceof NoStockException) {
+                msg = e.getMessage();
+                redirectAttributes.addFlashAttribute("msg", msg);
+                return "redirect:http://order.gulimall.com/toTrade";
+            }
             return "redirect:http://order.gulimall.com/toTrade";
         }
     }
