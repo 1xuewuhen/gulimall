@@ -15,10 +15,10 @@ import java.util.Map;
 @Configuration
 public class MyRabbitConfig {
 
-    @RabbitListener(queues = "stock.release.stock.queue")
-    public void handle(Message message, Channel channel){
-
-    }
+//    @RabbitListener(queues = "stock.release.stock.queue")
+//    public void handle(Message message, Channel channel){
+//
+//    }
 
     @Bean
     public MessageConverter messageConverter() {

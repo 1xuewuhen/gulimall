@@ -1,11 +1,13 @@
 package com.xwh.gulimall.order.service.impl;
 
 import com.alibaba.fastjson.TypeReference;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xwh.common.exception.NoStockException;
+import com.xwh.common.to.mq.OrderTo;
 import com.xwh.common.utils.PageUtils;
 import com.xwh.common.utils.Query;
 import com.xwh.common.utils.R;
@@ -24,7 +26,8 @@ import com.xwh.gulimall.order.service.OrderItemService;
 import com.xwh.gulimall.order.service.OrderService;
 import com.xwh.gulimall.order.to.OrderCreateTo;
 import com.xwh.gulimall.order.vo.*;
-import io.seata.spring.annotation.GlobalTransactional;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -35,6 +38,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -66,6 +70,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     private WareFeignService wareFeignService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -127,6 +134,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     /**
      * 选择最终一直性
+     *
      * @param vo
      * @return
      */
@@ -170,7 +178,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 if (r.getCode() == 0) {
                     response.setOrder(order.getOrder());
 //                    response.setCode(3);
-                    int i = 10/0;
+//                    int i = 10 / 0;
+                    //TODO 订单创建成功发送消息
+                    rabbitTemplate.convertAndSend("order-event-exchange", "order.create.order", order.getOrder());
                     return response;
                 } else {
                     response.setCode(3);
@@ -188,6 +198,51 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         }else {
 
         }*/
+    }
+
+    @Override
+    public OrderEntity getOrderByOrderSn(String orderSn) {
+
+        return this.getOne(new LambdaQueryWrapper<OrderEntity>().eq(OrderEntity::getOrderSn, orderSn));
+    }
+
+    @Override
+    public void closeOrder(OrderEntity entity) {
+        OrderEntity orderEntity = this.getById(entity.getId());
+        if (Objects.equals(orderEntity.getStatus(), OrderStatusEnum.CREATE_NEW.getCode())) {
+            // 关单
+            OrderEntity update = new OrderEntity();
+            update.setId(entity.getId());
+            update.setStatus(OrderStatusEnum.CANCLED.getCode());
+            this.updateById(update);
+            OrderTo orderTo = new OrderTo();
+            BeanUtils.copyProperties(orderEntity, orderTo);
+            try {
+                // TODO 保证消息一定会发送出去，没一个消息都可以做好日志记录（给数据保存每一个消息的详细记录
+                // TODO 定期扫描数据库将失败的消息再发送一次
+                rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", orderTo);
+            }catch (Exception e){
+                // TODO 将没发送成功的消息进行重新发送
+            }
+        }
+    }
+
+    /**
+     * 获取当前订单的支付信息
+     * @param orderSn
+     * @return
+     */
+    @Override
+    public PayVo getOrderPay(String orderSn) {
+        PayVo payVo = new PayVo();
+        OrderEntity orderByOrderSn = this.getOrderByOrderSn(orderSn);
+        List<OrderItemEntity> list = orderItemService.list(new LambdaQueryWrapper<OrderItemEntity>().eq(OrderItemEntity::getOrderSn, orderByOrderSn));
+        OrderItemEntity itemEntity = list.get(0);
+        payVo.setBody(itemEntity.getSkuAttrsVals());
+        payVo.setSubject(itemEntity.getSkuName());
+        payVo.setOut_trade_no(orderByOrderSn.getOrderSn());
+        payVo.setTotal_amount(orderByOrderSn.getPayAmount().setScale(2, RoundingMode.UP).toString());
+        return payVo;
     }
 
     private void saveOrder(OrderCreateTo order) {
