@@ -24,11 +24,14 @@ public class LoginUserInterceptor implements HandlerInterceptor {
             return true;
         }
         MemberRespVo o = (MemberRespVo) request.getSession().getAttribute(AuthServerConstant.LOGIN_USER);
+        if (new AntPathMatcher().match("/order/order/status/**", request.getRequestURI())) {
+            return true;
+        }
         if (o != null) {
             threadLocal.set(o);
             return true;
-        }else {
-            request.getSession().setAttribute("message","请先进行登录");
+        } else {
+            request.getSession().setAttribute("message", "请先进行登录");
             response.sendRedirect("http://auth.gulimall.com/login.html");
             return false;
         }

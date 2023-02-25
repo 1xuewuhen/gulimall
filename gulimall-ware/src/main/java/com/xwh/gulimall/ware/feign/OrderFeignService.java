@@ -1,5 +1,6 @@
 package com.xwh.gulimall.ware.feign;
 
+
 import com.xwh.common.utils.R;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

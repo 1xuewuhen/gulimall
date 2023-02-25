@@ -30,7 +30,7 @@ public class WareOrderTaskServiceImpl extends ServiceImpl<WareOrderTaskDao, Ware
     }
 
     @Override
-    public WareOrderTaskEntity getOrderTaskByOrderSn(String orderSn) {
+    public WareOrderTaskEntity getOrderTasKByOrderSn(String orderSn) {
 
         return this.getOne(new LambdaQueryWrapper<WareOrderTaskEntity>().eq(WareOrderTaskEntity::getOrderSn, orderSn));
     }

@@ -1,6 +1,5 @@
 package com.xwh.gulimall.ware.vo;
 
-
 import lombok.Data;
 
 import java.math.BigDecimal;
