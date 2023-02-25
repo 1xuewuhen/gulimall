@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xwh.common.exception.NoStockException;
+import com.xwh.common.to.mq.OrderTo;
 import com.xwh.common.utils.PageUtils;
 import com.xwh.common.utils.Query;
 import com.xwh.common.utils.R;
@@ -26,6 +27,7 @@ import com.xwh.gulimall.order.service.OrderService;
 import com.xwh.gulimall.order.to.OrderCreateTo;
 import com.xwh.gulimall.order.vo.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -177,7 +179,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 //                    response.setCode(3);
 //                    int i = 10 / 0;
                     // TODO 订单创建成功发送消息
-                    rabbitTemplate.convertAndSend("order-event-exchange","order.create.order",order.getOrder());
+                    rabbitTemplate.convertAndSend("order-event-exchange", "order.create.order", order.getOrder());
                     return response;
                 } else {
                     response.setCode(3);
@@ -212,6 +214,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             update.setId(orderEntity.getId());
             update.setStatus(OrderStatusEnum.CANCLED.getCode());
             this.updateById(update);
+            OrderTo orderTo = new OrderTo();
+            BeanUtils.copyProperties(orderEntity,orderTo);
+            rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", orderTo);
         }
     }
 

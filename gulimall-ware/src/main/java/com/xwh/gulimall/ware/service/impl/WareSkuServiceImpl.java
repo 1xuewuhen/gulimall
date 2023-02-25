@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xwh.common.exception.NoStockException;
 import com.xwh.common.to.SkuHasStockVo;
+import com.xwh.common.to.mq.OrderTo;
 import com.xwh.common.to.mq.StockDetailTo;
 import com.xwh.common.to.mq.StockLockedTo;
 import com.xwh.common.utils.PageUtils;
@@ -60,12 +61,12 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
     private OrderFeignService orderFeignService;
 
 
-    public void unLockStock(Long skuId, Long wareId, Integer num, Long tastDetailId) {
+    public void unLockStock(Long skuId, Long wareId, Integer num, Long taskDetailId) {
         // 库存解锁
         wareSkuDao.unLockStock(skuId, wareId, num);
         // 更新库存工作单状态
         WareOrderTaskDetailEntity entity = new WareOrderTaskDetailEntity();
-        entity.setSkuId(tastDetailId);
+        entity.setId(taskDetailId);
         entity.setLockStatus(2); // 已解锁
         wareOrderTaskDetailService.updateById(entity);
     }
@@ -243,6 +244,28 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             } else {
                 throw new RuntimeException("远程服务失败");
             }
+        }
+    }
+
+    /**
+     * 防止订单服务卡顿，导致订单状态一直改不了，库存消息优先到期。查订单状态新建状态，什么都不做就走了
+     * 导致卡顿的订单永远不能解锁库存
+     *
+     * @param to
+     */
+    @Transactional
+    @Override
+    public void unlockStock(OrderTo to) {
+        String orderSn = to.getOrderSn();
+        // 查一下最新的库存，防止重复解锁库存
+        WareOrderTaskEntity task = wareOrderTaskService.getOrderTasKByOrderSn(orderSn);
+        Long id = task.getId();
+        List<WareOrderTaskDetailEntity> entities = wareOrderTaskDetailService.list(new LambdaQueryWrapper<WareOrderTaskDetailEntity>()
+                .eq(WareOrderTaskDetailEntity::getTaskId, id)
+                .eq(WareOrderTaskDetailEntity::getLockStatus, 1));
+
+        for (WareOrderTaskDetailEntity entity : entities) {
+            unLockStock(entity.getSkuId(), entity.getWareId(), entity.getSkuNum(), entity.getId());
         }
     }
 
