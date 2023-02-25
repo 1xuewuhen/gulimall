@@ -1,8 +1,5 @@
 package com.xwh.gulimall.order.config;
 
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.ReturnedMessage;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +38,9 @@ public class RabbitConfig {
          * (correlationData, b, s) -> {
          *             System.out.printf("confirm...correlationData[%s]==>b[%s]==>s[%s]",correlationData,b,s);
          *         }
+         *         服务器收到了
+         *         1、做好消息确认机制（pulisher，consumer[手动ack]）
+         *         2、没一个发送的消息在数据库做好记录。定期将失败的消息再次发送
          */
         rabbitTemplate.setConfirmCallback((correlationData, b, s) -> System.out.printf("confirm...correlationData[%s]==>b[%s]==>s[%s]\n", correlationData, b, s));
         /*rabbitTemplate.setReturnCallback(new RabbitTemplate.ReturnCallback() {
@@ -56,6 +56,7 @@ public class RabbitConfig {
             public void returnedMessage(Message message, int i, String s, String s1, String s2) {
                 System.out.printf("Fail Message[%s]==>i[%d]==>s[%s]==>s1[%s]==>s2[%s]\n", message, i, s, s1, s2);
             }
+            // 报错了。修改数据库当前消息的状态->错误
         });*/
 
         rabbitTemplate.setReturnsCallback(returnedMessage -> System.out.println("returnedMessage["+returnedMessage+"]"));

@@ -216,7 +216,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             this.updateById(update);
             OrderTo orderTo = new OrderTo();
             BeanUtils.copyProperties(orderEntity,orderTo);
-            rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", orderTo);
+            try {
+                // TODO 保证消息一定会发送出去。没一个消息都可以做好日志记录
+                // TODO 定期扫描数据库将失败的消息再发送一遍
+                rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", orderTo);
+            }catch (Exception e){
+                // TODO 将没发送的成功的消息进行重试发送
+            }
         }
     }
 
