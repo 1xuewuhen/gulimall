@@ -36,6 +36,8 @@ public class StockReleaseListener {
     public void handleStockLockedRelease(StockLockedTo to, Message message, Channel channel) throws IOException {
         log.info("收到解锁库存的消息");
         try {
+            // 当前消息是否是的二次及以后派发过来了
+//            Integer receivedDelay = message.getMessageProperties().getReceivedDelay();
             wareSkuService.unlockStock(to);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } catch (Exception e) {
