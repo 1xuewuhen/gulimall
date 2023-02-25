@@ -15,6 +15,11 @@ import java.util.Map;
 @Configuration
 public class MyMQConfig {
 
+    /**
+     * 自动创建，如果没有的话
+     * 一旦创建好队列，属性发生变化，rabbitmq也不会发生变化
+     * @return 死信队列
+     */
     @Bean
     public Queue orderDelayQueue() {
         Map<String, Object> arguments = new HashMap<>();

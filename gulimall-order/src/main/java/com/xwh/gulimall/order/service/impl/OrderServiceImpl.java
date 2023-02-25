@@ -1,6 +1,7 @@
 package com.xwh.gulimall.order.service.impl;
 
 import com.alibaba.fastjson.TypeReference;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
@@ -127,6 +128,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     /**
      * 选择最终一直性
+     *
      * @param vo
      * @return
      */
@@ -170,7 +172,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 if (r.getCode() == 0) {
                     response.setOrder(order.getOrder());
 //                    response.setCode(3);
-                    int i = 10/0;
+                    int i = 10 / 0;
                     return response;
                 } else {
                     response.setCode(3);
@@ -188,6 +190,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         }else {
 
         }*/
+    }
+
+    @Override
+    public OrderEntity getOrderByOrderSn(String orderSn) {
+        return this.getOne(new LambdaQueryWrapper<OrderEntity>().eq(OrderEntity::getOrderSn, orderSn));
     }
 
     private void saveOrder(OrderCreateTo order) {
