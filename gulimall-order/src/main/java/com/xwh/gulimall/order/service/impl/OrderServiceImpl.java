@@ -25,7 +25,7 @@ import com.xwh.gulimall.order.service.OrderItemService;
 import com.xwh.gulimall.order.service.OrderService;
 import com.xwh.gulimall.order.to.OrderCreateTo;
 import com.xwh.gulimall.order.vo.*;
-import io.seata.spring.annotation.GlobalTransactional;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -67,6 +67,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     private WareFeignService wareFeignService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -172,7 +175,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 if (r.getCode() == 0) {
                     response.setOrder(order.getOrder());
 //                    response.setCode(3);
-                    int i = 10 / 0;
+//                    int i = 10 / 0;
+                    // TODO 订单创建成功发送消息
+                    rabbitTemplate.convertAndSend("order-event-exchange","order.create.order",order.getOrder());
                     return response;
                 } else {
                     response.setCode(3);
@@ -195,6 +200,19 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     @Override
     public OrderEntity getOrderByOrderSn(String orderSn) {
         return this.getOne(new LambdaQueryWrapper<OrderEntity>().eq(OrderEntity::getOrderSn, orderSn));
+    }
+
+    @Override
+    public void closeOrder(OrderEntity entity) {
+        // 查询当前订单的最新状态
+        OrderEntity orderEntity = this.getById(entity.getId());
+        if (Objects.equals(orderEntity.getStatus(), OrderStatusEnum.CREATE_NEW.getCode())) {
+            // 关单
+            OrderEntity update = new OrderEntity();
+            update.setId(orderEntity.getId());
+            update.setStatus(OrderStatusEnum.CANCLED.getCode());
+            this.updateById(update);
+        }
     }
 
     private void saveOrder(OrderCreateTo order) {
