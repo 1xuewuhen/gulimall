@@ -6,7 +6,6 @@ import com.xwh.common.to.mq.StockLockedTo;
 import com.xwh.common.utils.PageUtils;
 import com.xwh.gulimall.ware.entity.WareSkuEntity;
 import com.xwh.common.to.SkuHasStockVo;
-import com.xwh.gulimall.ware.vo.LockStockResult;
 import com.xwh.gulimall.ware.vo.WareSkuLockVo;
 
 import java.util.List;
@@ -29,8 +28,8 @@ public interface WareSkuService extends IService<WareSkuEntity> {
 
     Boolean orderLockStock(WareSkuLockVo vo);
 
-    void unLockStock(StockLockedTo to);
+    void unlockStock(StockLockedTo to);
 
-    void unLockStock(OrderTo to);
+    void unlockStock(OrderTo to);
 }
 
