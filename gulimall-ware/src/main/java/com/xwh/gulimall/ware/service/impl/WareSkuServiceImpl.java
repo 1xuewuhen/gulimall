@@ -61,7 +61,13 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
 
 
     public void unLockStock(Long skuId, Long wareId, Integer num, Long tastDetailId) {
+        // 库存解锁
         wareSkuDao.unLockStock(skuId, wareId, num);
+        // 更新库存工作单状态
+        WareOrderTaskDetailEntity entity = new WareOrderTaskDetailEntity();
+        entity.setSkuId(tastDetailId);
+        entity.setLockStatus(2); // 已解锁
+        wareOrderTaskDetailService.updateById(entity);
     }
 
     /**
@@ -229,9 +235,12 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                 });
                 if (date == null || date.getStatus() == 4) {
                     // 订单已经被取消了 订单不存在
-                    unLockStock(detail.getSkuId(), detail.getWareId(), detail.getSkuNum(), detailId);
+                    if (byId.getLockStatus() == 1) {
+                        unLockStock(detail.getSkuId(), detail.getWareId(), detail.getSkuNum(), detailId);
+                    }
+
                 }
-            }else {
+            } else {
                 throw new RuntimeException("远程服务失败");
             }
         }
