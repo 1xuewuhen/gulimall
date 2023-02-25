@@ -38,6 +38,7 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -216,8 +217,32 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             this.updateById(update);
             OrderTo orderTo = new OrderTo();
             BeanUtils.copyProperties(orderEntity,orderTo);
-            rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", orderTo);
+            try {
+                // TODO 保证消息一定会发送出去。没一个消息都可以做好日志记录
+                // TODO 定期扫描数据库将失败的消息再发送一遍
+                rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", orderTo);
+            }catch (Exception e){
+                // TODO 将没发送的成功的消息进行重试发送
+            }
         }
+    }
+
+    /**
+     *
+     * @param orderSn
+     * @return
+     */
+    @Override
+    public PayVo getOrderPay(String orderSn) {
+        PayVo payVo = new PayVo();
+        OrderEntity orderEntity = this.getOrderByOrderSn(orderSn);
+        List<OrderItemEntity> list = orderItemService.list(new LambdaQueryWrapper<OrderItemEntity>().eq(OrderItemEntity::getOrderSn,orderSn));
+        OrderItemEntity itemEntity = list.get(0);
+        payVo.setTotal_amount(orderEntity.getPayAmount().setScale(2, RoundingMode.UP).toString());
+        payVo.setOut_trade_no(orderEntity.getOrderSn());
+        payVo.setSubject(itemEntity.getSkuName());
+        payVo.setBody(itemEntity.getSkuAttrsVals());
+        return payVo;
     }
 
     private void saveOrder(OrderCreateTo order) {
