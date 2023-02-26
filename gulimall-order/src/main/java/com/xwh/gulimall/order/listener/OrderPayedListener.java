@@ -1,6 +1,7 @@
 package com.xwh.gulimall.order.listener;
 
 
+import com.alibaba.fastjson2.JSON;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.xwh.gulimall.order.config.AlipayTemplate;
@@ -8,8 +9,7 @@ import com.xwh.gulimall.order.service.OrderService;
 import com.xwh.gulimall.order.vo.PayAsyncVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -24,8 +24,9 @@ public class OrderPayedListener {
 
     @Autowired
     private AlipayTemplate alipayTemplate;
+//    vleyeq0537@sandbox.com
 
-    @GetMapping("/payed/notify")
+    @PostMapping("/payed/notify")
     public String handleAliPayed(PayAsyncVo vo, HttpServletRequest request) throws AlipayApiException {
         // 验签
         Map<String, String> params = new HashMap<>();
@@ -41,12 +42,28 @@ public class OrderPayedListener {
             params.put(name, valueStr);
         }
         boolean b = AlipaySignature.rsaCheckV1(params, alipayTemplate.getAlipay_public_key(), alipayTemplate.getCharset(), alipayTemplate.getSign_type());
-        if (b){
+        if (b) {
             log.info("success");
             return orderService.handleAliPayed(vo);
-        }else {
+        } else {
             log.info("error");
             return "error";
         }
+    }
+
+    @PostMapping("/my/payed/notify")
+    public void handleAliPayed(@RequestBody Map<String,String> vo) {
+        PayAsyncVo payAsyncVo = JSON.parseObject(JSON.toJSONString(vo), PayAsyncVo.class);
+        orderService.handleAliPayed(payAsyncVo);
+    }
+
+    @GetMapping("/my/test")
+    public String tset() {
+        return "rr2dasf12313";
+    }
+
+    @PostMapping("/my/test12")
+    public String tests(@RequestBody Map<String,String> stringMap){
+        return "fsdafwqresfdsa324" + stringMap.toString();
     }
 }

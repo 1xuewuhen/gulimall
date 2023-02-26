@@ -19,13 +19,15 @@ public class LoginUserInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         MemberRespVo o = (MemberRespVo) request.getSession().getAttribute(AuthServerConstant.LOGIN_USER);
         if (new AntPathMatcher().match("/order/order/status/**", request.getRequestURI())
-                || new AntPathMatcher().match("/payed/**", request.getRequestURI())) {
+                || new AntPathMatcher().match("/payed/**", request.getRequestURI())
+                || new AntPathMatcher().match("/my/**", request.getRequestURI())) {
             return true;
         }
         if (o != null) {
             threadLocal.set(o);
             return true;
         } else {
+//            return  true;
             request.getSession().setAttribute("message", "请先进行登录");
             response.sendRedirect("http://auth.gulimall.com/login.html");
             return false;

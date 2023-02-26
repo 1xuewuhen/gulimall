@@ -65,6 +65,7 @@ public class AlipayTemplate {
                 + "\"total_amount\":\"" + total_amount + "\","
                 + "\"subject\":\"" + subject + "\","
                 + "\"body\":\"" + body + "\","
+                + "\"timeout_express\":\"1m\","
                 + "\"product_code\":\"FAST_INSTANT_TRADE_PAY\"}");
 
         //会收到支付宝的响应，响应的是一个页面，只要浏览器显示这个页面，就会自动来到支付宝的收银台页面
