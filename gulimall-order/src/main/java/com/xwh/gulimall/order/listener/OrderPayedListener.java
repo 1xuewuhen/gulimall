@@ -1,7 +1,7 @@
 package com.xwh.gulimall.order.listener;
 
 
-import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson.JSON;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.xwh.gulimall.order.config.AlipayTemplate;
@@ -9,7 +9,10 @@ import com.xwh.gulimall.order.service.OrderService;
 import com.xwh.gulimall.order.vo.PayAsyncVo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
@@ -52,7 +55,7 @@ public class OrderPayedListener {
     }
 
     @PostMapping("/my/payed/notify")
-    public void handleAliPayed(@RequestBody Map<String,String> vo) {
+    public void handleAliPayed(@RequestBody Map<String, String> vo) {
         PayAsyncVo payAsyncVo = JSON.parseObject(JSON.toJSONString(vo), PayAsyncVo.class);
         orderService.handleAliPayed(payAsyncVo);
     }
@@ -63,7 +66,7 @@ public class OrderPayedListener {
     }
 
     @PostMapping("/my/test12")
-    public String tests(@RequestBody Map<String,String> stringMap){
+    public String tests(@RequestBody Map<String, String> stringMap) {
         return "fsdafwqresfdsa324" + stringMap.toString();
     }
 }
