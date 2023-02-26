@@ -28,5 +28,6 @@
         <module>gulimall-search</module>
         <module>gulimall-search1</module>
         <module>gulimall-auth-server</module>
+        <module>zhiFuBao</module>
     </modules>
 </project>

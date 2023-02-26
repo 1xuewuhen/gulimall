@@ -19,7 +19,7 @@ public class IndexController {
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping(value = {"/", "/index.html"})
+    @GetMapping(value = {"/", "/index.html","/index"})
     public String indexPage(Model model) {
         //TODO 查出所有1级分类
         List<CategoryEntity> categoryEntities = categoryService.getLevel1Categorys();
