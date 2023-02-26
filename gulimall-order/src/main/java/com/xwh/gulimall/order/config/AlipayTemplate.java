@@ -7,7 +7,6 @@ import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.xwh.gulimall.order.vo.PayVo;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 //@PropertySource(value = {"classpath:alipay.properties"})
@@ -40,6 +39,8 @@ public class AlipayTemplate {
     // 支付宝网关； https://openapi.alipaydev.com/gateway.do
     private String gatewayUrl;
 
+    private String timeout;
+
     public String pay(PayVo vo) throws AlipayApiException {
 
         //AlipayClient alipayClient = new DefaultAlipayClient(AlipayTemplate.gatewayUrl, AlipayTemplate.app_id, AlipayTemplate.merchant_private_key, "json", AlipayTemplate.charset, AlipayTemplate.alipay_public_key, AlipayTemplate.sign_type);
@@ -66,6 +67,7 @@ public class AlipayTemplate {
                 + "\"total_amount\":\"" + total_amount + "\","
                 + "\"subject\":\"" + subject + "\","
                 + "\"body\":\"" + body + "\","
+                + "\"timeout_express\":\"" + timeout + "\","
                 + "\"product_code\":\"FAST_INSTANT_TRADE_PAY\"}");
 
         //会收到支付宝的响应，响应的是一个页面，只要浏览器显示这个页面，就会自动来到支付宝的收银台页面
