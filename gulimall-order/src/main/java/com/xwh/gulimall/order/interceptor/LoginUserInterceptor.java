@@ -18,7 +18,8 @@ public class LoginUserInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         MemberRespVo o = (MemberRespVo) request.getSession().getAttribute(AuthServerConstant.LOGIN_USER);
-        if (new AntPathMatcher().match("/order/order/status/**", request.getRequestURI())) {
+        if (new AntPathMatcher().match("/order/order/status/**", request.getRequestURI())
+                || new AntPathMatcher().match("/payed/**", request.getRequestURI())) {
             return true;
         }
         if (o != null) {

@@ -16,6 +16,7 @@ import com.xwh.gulimall.order.constant.OrderConstant;
 import com.xwh.gulimall.order.dao.OrderDao;
 import com.xwh.gulimall.order.entity.OrderEntity;
 import com.xwh.gulimall.order.entity.OrderItemEntity;
+import com.xwh.gulimall.order.entity.PaymentInfoEntity;
 import com.xwh.gulimall.order.enume.OrderStatusEnum;
 import com.xwh.gulimall.order.feign.CartFeignService;
 import com.xwh.gulimall.order.feign.MemberFeignService;
@@ -24,6 +25,7 @@ import com.xwh.gulimall.order.feign.WareFeignService;
 import com.xwh.gulimall.order.interceptor.LoginUserInterceptor;
 import com.xwh.gulimall.order.service.OrderItemService;
 import com.xwh.gulimall.order.service.OrderService;
+import com.xwh.gulimall.order.service.PaymentInfoService;
 import com.xwh.gulimall.order.to.OrderCreateTo;
 import com.xwh.gulimall.order.vo.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -52,6 +54,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     private ThreadLocal<OrderSubmitVo> confirmVoThreadLocal = new ThreadLocal<>();
     @Autowired
     private MemberFeignService memberFeignService;
+
+    @Autowired
+    private PaymentInfoService paymentInfoService;
 
     @Autowired
     private CartFeignService cartFeignService;
@@ -216,19 +221,18 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             update.setStatus(OrderStatusEnum.CANCLED.getCode());
             this.updateById(update);
             OrderTo orderTo = new OrderTo();
-            BeanUtils.copyProperties(orderEntity,orderTo);
+            BeanUtils.copyProperties(orderEntity, orderTo);
             try {
                 // TODO 保证消息一定会发送出去。没一个消息都可以做好日志记录
                 // TODO 定期扫描数据库将失败的消息再发送一遍
                 rabbitTemplate.convertAndSend("order-event-exchange", "order.release.other", orderTo);
-            }catch (Exception e){
+            } catch (Exception e) {
                 // TODO 将没发送的成功的消息进行重试发送
             }
         }
     }
 
     /**
-     *
      * @param orderSn
      * @return
      */
@@ -236,13 +240,52 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     public PayVo getOrderPay(String orderSn) {
         PayVo payVo = new PayVo();
         OrderEntity orderEntity = this.getOrderByOrderSn(orderSn);
-        List<OrderItemEntity> list = orderItemService.list(new LambdaQueryWrapper<OrderItemEntity>().eq(OrderItemEntity::getOrderSn,orderSn));
+        List<OrderItemEntity> list = orderItemService.list(new LambdaQueryWrapper<OrderItemEntity>().eq(OrderItemEntity::getOrderSn, orderSn));
         OrderItemEntity itemEntity = list.get(0);
         payVo.setTotal_amount(orderEntity.getPayAmount().setScale(2, RoundingMode.UP).toString());
         payVo.setOut_trade_no(orderEntity.getOrderSn());
         payVo.setSubject(itemEntity.getSkuName());
         payVo.setBody(itemEntity.getSkuAttrsVals());
         return payVo;
+    }
+
+    @Override
+    public PageUtils queryPageWithItem(Map<String, Object> params) {
+
+        MemberRespVo memberRespVo = LoginUserInterceptor.threadLocal.get();
+        IPage<OrderEntity> page = this.page(
+                new Query<OrderEntity>().getPage(params),
+                new LambdaQueryWrapper<OrderEntity>().eq(OrderEntity::getMemberId, memberRespVo.getId())
+                        .orderByDesc(OrderEntity::getId)
+        );
+        List<OrderEntity> collect = page.getRecords().stream().peek(order -> {
+            List<OrderItemEntity> itemEntities = orderItemService.list(new LambdaQueryWrapper<OrderItemEntity>().eq(OrderItemEntity::getOrderSn, order.getOrderSn()));
+            order.setItemEntities(itemEntities);
+        }).collect(Collectors.toList());
+        page.setRecords(collect);
+        return new PageUtils(page);
+    }
+
+    /**
+     * 处理支付包处理结果
+     * @param vo
+     * @return
+     */
+    @Override
+    public String handleAliPayed(PayAsyncVo vo) {
+        // 保存交易流水
+        PaymentInfoEntity infoEntity = new PaymentInfoEntity();
+        infoEntity.setAlipayTradeNo(vo.getTrade_no());
+        infoEntity.setOrderSn(vo.getOut_trade_no());
+        infoEntity.setPaymentStatus(vo.getTrade_status());
+        infoEntity.setCallbackTime(vo.getNotify_time());
+        paymentInfoService.save(infoEntity);
+        if ("TRADE_SUCCESS".equals(vo.getTrade_status()) || "TRADE_FINISHED".equals(vo.getTrade_status())) {
+            // 支付成功
+            String outTradeNo = vo.getOut_trade_no();
+            this.baseMapper.updateOrderStatus(outTradeNo,OrderStatusEnum.PAYED.getCode());
+        }
+        return "success";
     }
 
     private void saveOrder(OrderCreateTo order) {
