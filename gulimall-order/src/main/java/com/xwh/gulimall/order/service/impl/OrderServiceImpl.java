@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xwh.common.exception.NoStockException;
 import com.xwh.common.to.mq.OrderTo;
+import com.xwh.common.to.mq.SeckillOrderTo;
 import com.xwh.common.utils.PageUtils;
 import com.xwh.common.utils.Query;
 import com.xwh.common.utils.R;
@@ -268,6 +269,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     /**
      * 处理支付包处理结果
+     *
      * @param vo
      * @return
      */
@@ -283,9 +285,30 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         if ("TRADE_SUCCESS".equals(vo.getTrade_status()) || "TRADE_FINISHED".equals(vo.getTrade_status())) {
             // 支付成功
             String outTradeNo = vo.getOut_trade_no();
-            this.baseMapper.updateOrderStatus(outTradeNo,OrderStatusEnum.PAYED.getCode());
+            this.baseMapper.updateOrderStatus(outTradeNo, OrderStatusEnum.PAYED.getCode());
         }
         return "success";
+    }
+
+    @Transactional
+    @Override
+    public void createSeckillOrder(SeckillOrderTo seckillOrder) {
+        // TODO 保存订单信息
+        OrderEntity orderEntity = new OrderEntity();
+        orderEntity.setOrderSn(seckillOrder.getOrderSn());
+        orderEntity.setMemberId(seckillOrder.getMemberId());
+        orderEntity.setStatus(OrderStatusEnum.CREATE_NEW.getCode());
+        BigDecimal multiply = seckillOrder.getSeckillPrice().multiply(new BigDecimal(seckillOrder.getNum() + ""));
+        orderEntity.setPayAmount(multiply);
+        this.save(orderEntity);
+        // TODO  保存订单项信息
+        OrderItemEntity orderItemEntity = new OrderItemEntity();
+        orderItemEntity.setOrderSn(seckillOrder.getOrderSn());
+        orderItemEntity.setRealAmount(multiply);
+        orderItemEntity.setSkuQuantity(seckillOrder.getNum());
+        // TODO 获取当前sku信息
+//        productFeignService.getSpuInfoBySkuId()
+        orderItemService.save(orderItemEntity);
     }
 
     private void saveOrder(OrderCreateTo order) {
