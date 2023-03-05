@@ -16,6 +16,7 @@ public class SkuItemVo {
     private List<SkuItemSaleAttrVo> saleAttr;
     private SpuInfoDescEntity desc;
     private List<SpuItemAttrGroupVo> groupAttrs;
+    private SeckillInfoVo seckillInfo;
 
     @Data
     public static class SkuItemSaleAttrVo {
