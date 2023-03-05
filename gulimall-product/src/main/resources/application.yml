@@ -33,7 +33,7 @@ server:
 
 logging:
   level:
-    com.xwh.gulimall: error
+    com.xwh.gulimall: debug
 
 seata:
   enabled: true
